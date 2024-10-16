@@ -1,3 +1,10 @@
+[ -s "/home/billy/.local/share/bun/_bun" ] && source "/home/billy/.local/share/bun/_bun"
+
+# Environment variables
+export GOPATH="$HOME/xxxxx"
+export MODULAR_HOME="$HOME/.modular"
+export BUN_INSTALL="$HOME/.local/share/bun"
+
 # Path modifications
 export PATH="$HOME/.local/bin:$PATH"
 export PATH="$HOME/.local/share/bob/nvim-bin:$PATH"
@@ -9,10 +16,6 @@ export PATH="$PATH:$(go env GOPATH)/bin"
 export PATH="$HOME/.modular/pkg/packages.modular.com_max/bin:$PATH"
 export PATH="$BUN_INSTALL/bin:$PATH"
 
-# Environment variables
-export GOPATH="$HOME/xxxxx"
-export MODULAR_HOME="$HOME/.modular"
-export BUN_INSTALL="$HOME/.local/share/bun"
 
 # History configuration
 HISTSIZE=1000
@@ -30,6 +33,8 @@ eval "$(zoxide init zsh)"
 eval "$(fzf --zsh)"
 eval "$(fnm env)"
 
+HOMEBREW_NO_ENV_HINTS=true
+
 # Juliaup initialization
 path=("$HOME/.juliaup/bin" $path)
 
@@ -43,9 +48,9 @@ alias ez="n $HOME/.zshrc"
 alias es="n $HOME/.config/starship.toml"
 alias sz="source $HOME/.zshrc"
 alias sau="sudo apt update && sudo apt upgrade && sudo apt autoremove && brew upgrade"
-alias py="python"
+alias py="python3"
 alias c="clear"
-
+alias lg="lazygit"
 
 eval "$(starship init zsh)"
 ZLE_RPROMPT_INDENT=0
