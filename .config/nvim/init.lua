@@ -1,16 +1,7 @@
 require("core.globals")
 require("core.options")
 require("core.keymaps")
-
--- [[ Basic Autocommands ]]
--- Highlight when yanking (copying) text
-vim.api.nvim_create_autocmd("TextYankPost", {
-	desc = "Highlight when yanking (copying) text",
-	group = vim.api.nvim_create_augroup("kickstart-highlight-yank", { clear = true }),
-	callback = function()
-		vim.highlight.on_yank()
-	end,
-})
+require("core.autocmds")
 
 -- [[ Install `lazy.nvim` plugin manager ]]
 local lazypath = vim.fn.stdpath("data") .. "/lazy/lazy.nvim"
@@ -20,87 +11,17 @@ if not vim.loop.fs_stat(lazypath) then
 end ---@diagnostic disable-next-line: undefined-field
 vim.opt.rtp:prepend(lazypath)
 
--- autocmds
-vim.api.nvim_create_autocmd("BufWinEnter", {
-	pattern = { "*.md" },
-	callback = function()
-		vim.opt.textwidth = 80
-	end,
-})
-
-vim.api.nvim_create_autocmd({ "BufWinLeave" }, {
-	pattern = { "*.md" },
-	callback = function()
-		vim.opt.textwidth = 120
-	end,
-})
-
--- Open neovim to find_files
-vim.api.nvim_create_autocmd("VimEnter", {
-	callback = function()
-		if vim.fn.argv(0) == "" then
-			require("telescope.builtin").find_files()
-		end
-	end,
-})
-
 require("lazy").setup({
-	{ -- Fuzzy Finder (files lsp, etc)
-		"nvim-telescope/telescope.nvim",
-		event = "VimEnter",
-		branch = "0.1.x",
-		dependencies = {
-			"nvim-lua/plenary.nvim",
-			{ -- If encountering errors see telescope-fzf-native README for installation instructions
-				"nvim-telescope/telescope-fzf-native.nvim",
-
-				build = "make",
-
-				cond = function()
-					return vim.fn.executable("make") == 1
-				end,
-			},
-			{ "nvim-telescope/telescope-ui-select.nvim" },
-
-			{ "nvim-tree/nvim-web-devicons", enabled = vim.g.have_nerd_font },
-		},
+	{
+		"ibhagwan/fzf-lua",
+		-- optional for icon support
+		dependencies = { "nvim-tree/nvim-web-devicons" },
 		config = function()
-			require("telescope").setup({
-				extensions = {
-					["ui-select"] = {
-						require("telescope.themes").get_dropdown(),
-					},
-				},
-				pickers = {
-					-- find_files = { hidden = true, no_ignore = true },
-					find_files = {
-						find_command = {
-							"rg",
-							"--files",
-							"--no-ignore",
-							"--hidden",
-							"--glob",
-							"!**/.git/*",
-							"--glob",
-							"!**/node_modules/",
-						},
-					},
-				},
-			})
-
-			pcall(require("telescope").load_extension, "fzf")
-			pcall(require("telescope").load_extension, "ui-select")
-
-			local builtin = require("telescope.builtin")
-			vim.keymap.set("n", "<leader>sh", builtin.help_tags, { desc = "[S]earch [H]elp" })
-			vim.keymap.set("n", "<leader>sk", builtin.keymaps, { desc = "[S]earch [K]eymaps" })
-			vim.keymap.set("n", "<leader>sf", builtin.find_files, { desc = "[S]earch [F]iles" })
-			vim.keymap.set("n", "<leader>ss", builtin.builtin, { desc = "[S]earch [S]elect Telescope" })
-			vim.keymap.set("n", "<leader>sw", builtin.grep_string, { desc = "[S]earch current [W]ord" })
-			vim.keymap.set("n", "<leader>sg", builtin.live_grep, { desc = "[S]earch by [G]rep" })
-			vim.keymap.set("n", "<leader>sd", builtin.diagnostics, { desc = "[S]earch [D]iagnostics" })
-			vim.keymap.set("n", "<leader>so", builtin.oldfiles, { desc = "[S]earch [O]ld Files" })
-			vim.keymap.set("n", "<leader><leader>", builtin.find_files, { desc = "[S]earch [F]iles" })
+			-- calling `setup` is optional for customization
+			require("fzf-lua").setup({})
+			vim.keymap.set("n", "<leader><leader>", require("fzf-lua").files, { desc = "Find files" })
+			vim.keymap.set("n", "<leader>sg", require("fzf-lua").live_grep, { desc = "[s]earch [g]rep" })
+			vim.keymap.set("n", "<leader>sk", require("fzf-lua").keymaps, { desc = "[s]earch [k]eymaps" })
 		end,
 	},
 
@@ -141,13 +62,13 @@ require("lazy").setup({
 
 					-- Jump to the definition of the word under your cursor.
 					--  To jump back press <C-t>.
-					map("gd", require("telescope.builtin").lsp_definitions, "[G]oto [D]efinition")
+					map("gd", require("fzf-lua").lsp_definitions, "[G]oto [D]efinition")
 
 					-- Find references for the word under your cursor.
-					map("gr", require("telescope.builtin").lsp_references, "[G]oto [R]eferences")
+					map("gr", require("fzf-lua").lsp_references, "[G]oto [R]eferences")
 
 					-- Jump to the implementation of the word under your cursor.
-					map("gI", require("telescope.builtin").lsp_implementations, "[G]oto [I]mplementation")
+					map("gI", require("fzf-lua").lsp_implementations, "[G]oto [I]mplementation")
 
 					-- Rename the variable under your cursor.
 					map("<leader>rn", vim.lsp.buf.rename, "[R]e[n]ame")
@@ -197,8 +118,6 @@ require("lazy").setup({
 				emmet_language_server = {},
 				templ = {},
 				julials = {},
-				basedpyright = { ft = "mojo" },
-				phpactor = { ft = "blade", "php" },
 			}
 			-- Ensure the servers and tools above are installed
 			require("mason").setup()
@@ -225,9 +144,6 @@ require("lazy").setup({
 					end,
 				},
 			})
-			require("lspconfig").basedpyright.setup({
-				filetypes = { "mojo" },
-			})
 
 			require("lspconfig").emmet_language_server.setup({
 				filetypes = {
@@ -241,8 +157,6 @@ require("lazy").setup({
 					"scss",
 					"pug",
 					"typescriptreact",
-					"php",
-					"blade",
 				},
 				-- Read more about this options in the [vscode docs](https://code.visualstudio.com/docs/editor/emmet#_emmet-configuration).
 				-- **Note:** only the options listed in the table are supported.
@@ -319,9 +233,6 @@ require("lazy").setup({
 				html = { "prettierd" },
 				json = { "prettierd" },
 				markdown = { "markdownlint-cli2" },
-				mojo = { "black" },
-				php = { "pint", "php_cs_fixer" },
-				blade = { "blade_formatter" },
 			},
 		},
 	},
@@ -429,7 +340,6 @@ require("lazy").setup({
 				"typescript",
 				"tsx",
 				"python",
-				"php",
 			},
 			-- Autoinstall languages that are not installed
 			auto_install = true,
@@ -440,23 +350,9 @@ require("lazy").setup({
 			indent = { enable = true, disable = { "ruby" } },
 		},
 		config = function(_, opts)
-			vim.filetype.add({
-				pattern = {
-					[".*%.blade%.php"] = "blade",
-				},
-			})
 			---@diagnostic disable-next-line: missing-fields
 			require("nvim-treesitter.configs").setup(opts)
 			local parser_config = require("nvim-treesitter.parsers").get_parser_configs()
-
-			parser_config.blade = {
-				install_info = {
-					url = "https://github.com/EmranMR/tree-sitter-blade",
-					files = { "src/parser.c" },
-					branch = "main",
-				},
-				filetype = "blade",
-			}
 		end,
 	},
 

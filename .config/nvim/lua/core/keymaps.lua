@@ -25,3 +25,8 @@ vim.keymap.set("n", "<leader>x", "<cmd>bdelete<CR>", { desc = "Delete current bu
 vim.keymap.set("n", "<leader>ld", "<cmd>Lazy<CR>", { desc = "Open [L]azy [D]ashboard" })
 vim.keymap.set("n", "gn", "<C-o>", { desc = "[g]o [n]ext in jumplist" })
 vim.keymap.set("n", "gb", "<C-i>", { desc = "[g]o [b]ack in jumplist" })
+
+-- FZF Lua mappings
+-- vim.keymap.set("n", "<leader><leader>", require("fzf-lua").files, { desc = "Find files" })
+-- vim.keymap.set("n", "<leader>sg", require("fzf-lua").live_grep, { desc = "[s]earch [g]rep" })
+-- vim.keymap.set("n", "<leader>sk", require("fzf-lua").Keymaps, { desc = "[s]earch [k]eymaps" })
