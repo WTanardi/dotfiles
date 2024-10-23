@@ -100,7 +100,7 @@ require("lazy").setup({
 			-- Enable the following language servers
 			local servers = {
 				gopls = {},
-				tsserver = {},
+				ts_ls = {},
 				lua_ls = {
 					settings = {
 						Lua = {
